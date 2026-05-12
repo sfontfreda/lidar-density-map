@@ -1,6 +1,33 @@
+from pathlib import Path
+
+import laspy
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+
+def read_file(file_path):
+    path = Path(file_path)
+    suffix = path.suffix.lower()
+
+    if suffix == ".csv":
+        df = pd.read_csv(path)
+        for col in ("x", "y", "z", "classification"):
+            if col not in df.columns:
+                raise ValueError(f"El CSV no té la columna requerida: '{col}'")
+    elif suffix in (".las", ".laz"):
+        las = laspy.read(path)
+        df = pd.DataFrame({
+            "x": las.x.scaled_array(),
+            "y": las.y.scaled_array(),
+            "z": las.z.scaled_array(),
+            "classification": np.array(las.classification),
+        })
+    else:
+        raise ValueError(f"Format no suportat: '{suffix}'. Usa .csv, .las o .laz")
+
+    print(f"Fitxer llegit: {file_path} ({len(df):,} punts)")
+    return df
 
 
 def generate_sample_data(output_path, n_points=5000, seed=42):
