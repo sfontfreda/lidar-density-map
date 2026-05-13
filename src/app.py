@@ -96,24 +96,24 @@ class MainWindow(QMainWindow):
         try:
             return {int(c.strip()) for c in text.split(",")}
         except ValueError:
-            raise ValueError(f"Classes invàlides: '{text}'. Usa enters separats per comes, p.ex. 3,4,5")
+            raise ValueError(f"Invalid classes: '{text}'. Use comma-separated integers, e.g. 3,4,5")
 
     def _run(self):
         path = self.file_edit.text()
         if not path:
-            QMessageBox.warning(self, "Sense fitxer", "Selecciona un fitxer d'entrada primer.")
+            QMessageBox.warning(self, "No file selected", "Please select an input file first.")
             return
 
         try:
             classes = self._parse_classes()
 
-            self.status.showMessage("Llegint fitxer…")
+            self.status.showMessage("Reading file…")
             QApplication.processEvents()
             df = read_file(path)
 
             available = sorted(int(c) for c in df["classification"].unique())
 
-            self.status.showMessage("Calculant densitat…")
+            self.status.showMessage("Computing density…")
             QApplication.processEvents()
             self._density, self._x_bins, self._y_bins = compute_density(
                 df, classes, cell_size=self.cell_size_slider.value()
@@ -123,14 +123,14 @@ class MainWindow(QMainWindow):
             matched = df["classification"].isin(classes).sum()
             if matched == 0:
                 self.status.showMessage(
-                    f"No hi ha punts de les classes {sorted(classes)}. "
-                    f"Classes disponibles: {available}"
+                    f"No points found for classes {sorted(classes)}. "
+                    f"Available classes: {available}"
                 )
                 return
 
             self._plot()
             self.status.showMessage(
-                f"{len(df):,} punts — classes disponibles: {available}"
+                f"{len(df):,} points — available classes: {available}"
             )
 
         except Exception as e:
@@ -155,10 +155,10 @@ class MainWindow(QMainWindow):
             cmap="YlGn",
             vmin=0, vmax=1,
         )
-        self.figure.colorbar(im, ax=ax, label="Densitat relativa (0–1)")
+        self.figure.colorbar(im, ax=ax, label="Relative density (0–1)")
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
-        ax.set_title("Mapa de densitat LiDAR")
+        ax.set_title("LiDAR Density Map")
         self.figure.tight_layout()
         self.canvas.draw()
 

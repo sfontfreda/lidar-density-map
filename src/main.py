@@ -14,7 +14,7 @@ def read_file(file_path):
         df = pd.read_csv(path)
         for col in ("x", "y", "z", "classification"):
             if col not in df.columns:
-                raise ValueError(f"El CSV no té la columna requerida: '{col}'")
+                raise ValueError(f"CSV is missing required column: '{col}'")
     elif suffix in (".las", ".laz"):
         las = laspy.read(path)
         df = pd.DataFrame({
@@ -24,9 +24,9 @@ def read_file(file_path):
             "classification": np.array(las.classification),
         })
     else:
-        raise ValueError(f"Format no suportat: '{suffix}'. Usa .csv, .las o .laz")
+        raise ValueError(f"Unsupported format: '{suffix}'. Use .csv, .las or .laz")
 
-    print(f"Fitxer llegit: {file_path} ({len(df):,} punts)")
+    print(f"File read: {file_path} ({len(df):,} points)")
     return df
 
 
@@ -40,7 +40,7 @@ def generate_sample_data(output_path, n_points=5000, seed=42):
 
     df = pd.DataFrame({"x": x, "y": y, "z": z, "classification": classification})
     df.to_csv(output_path, index=False)
-    print(f"Fitxer generat: {output_path} ({n_points} punts)")
+    print(f"File generated: {output_path} ({n_points} points)")
 
 
 def compute_density(df, target_classes, cell_size=10):
@@ -68,13 +68,13 @@ def plot_density(density, x_bins, y_bins, output_path):
         vmin=0, vmax=1,
     )
 
-    plt.colorbar(im, ax=ax, label="Densitat relativa (0–1)")
+    plt.colorbar(im, ax=ax, label="Relative density (0–1)")
     ax.set_xlabel("X (m)")
     ax.set_ylabel("Y (m)")
-    ax.set_title("Mapa de densitat per classe")
+    ax.set_title("Density map by class")
     plt.tight_layout()
     plt.savefig(output_path, dpi=150)
-    print(f"Mapa guardat: {output_path}")
+    print(f"Map saved: {output_path}")
 
 
 if __name__ == "__main__":
