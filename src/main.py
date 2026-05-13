@@ -52,7 +52,7 @@ def compute_density(df, target_classes, cell_size=10):
     mask = df["classification"].isin(target_classes)
     target, _, _ = np.histogram2d(df[mask]["x"], df[mask]["y"], bins=[x_bins, y_bins])
 
-    density = np.where(total > 0, target / total, 0)
+    density = np.divide(target, total, out=np.zeros_like(target, dtype=float), where=total > 0)
 
     return density, x_bins, y_bins
 
@@ -76,21 +76,6 @@ def plot_density(density, x_bins, y_bins, output_path):
     plt.savefig(output_path, dpi=150)
     print(f"Mapa guardat: {output_path}")
 
-def export_csv(density, x_bins, y_bins, output_path):
-    cell_size = x_bins[1] - x_bins[0]
-    rows = []
-
-    for i in range(density.shape[0]):
-        for j in range(density.shape[1]):
-            rows.append({
-                "x_centre": round(x_bins[i] + cell_size / 2, 2),
-                "y_centre": round(y_bins[j] + cell_size / 2, 2),
-                "density": round(float(density[i, j]), 4),
-            })
-
-    pd.DataFrame(rows).to_csv(output_path, index=False)
-    print(f"CSV exportat: {output_path}")
-
 
 if __name__ == "__main__":
     generate_sample_data("data/sample.csv")
@@ -101,4 +86,3 @@ if __name__ == "__main__":
     density, x_bins, y_bins = compute_density(df, target_classes, cell_size=10)
 
     plot_density(density, x_bins, y_bins, "output/density_map.png")
-    export_csv(density, x_bins, y_bins, "output/density.csv")
